@@ -4,14 +4,17 @@ Created on Sat May  7 09:33:47 2022
 
 @author: Blackpolar
 """
-
+import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import rawpy
 
 def showImage(img,imageLabel):
     #Converts images to uint8 for cv2 imshow.
-    img = img.astype(np.uint16)
+    print(img.dtype)
+    if (img.dtype != np.uint16):
+        img = cv2.normalize(img,None,0,65535,cv2.NORM_MINMAX,cv2.CV_16U)
+        # img = img.astype(np.uint16)
     
     imageName = 'Original Image' + imageLabel
     #Show images at 500x500, feel free to change if necessary
@@ -61,6 +64,7 @@ def hsvConverter(img):
 
 
 def weightedAverageFiltering(img):
+   
     #Creates a weighted average kernel 
     weightAvgKernel = np.array([[1/16,1/16,1/16],
                                 [1/16,1/2,1/16],
@@ -68,7 +72,6 @@ def weightedAverageFiltering(img):
     if (np.sum(weightAvgKernel) != 1):
         print("Please check kernel as sum of kernel: ",np.sum(weightAvgKernel))
     imgWeightedAvg = cv2.filter2D(src=img, ddepth=-1, kernel=weightAvgKernel)
-    imgWeightedAvg = imgWeightedAvg.astype(np.uint16)
     #showImage(imgWeightedAvg)
     maxi = np.max(imgWeightedAvg)
     mini = np.min(imgWeightedAvg)
@@ -78,6 +81,7 @@ def weightedAverageFiltering(img):
     
 
 def thresholding(img):
+    #Original Number 90,360
     img[img<90] = 100000
     img[img>360] = 100000
     # for y,row in enumerate(img):
@@ -96,6 +100,32 @@ def consistencyCheck(img):
             if y == 0 or y ==1500:
                 continue
     return None
+
+def convertGreyScale(img):
+    if (img.dtype != np.float32):
+        img = img.astype(np.float32)
+    
+    # All the methods below will not work and will result in an all black scenario
+    # if (img.dtype != np.uint8) :
+    #     img = img.astype(np.uint8)
+    #     img = cv2.normalize(img,None,0,255,cv2.NORM_MINMAX,cv2.CV_8U)
+    #Note that cvtColor requires float32 as input 
+    grey = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
+    
+    return grey
+    
+
+def cannyDetector(img,thresh1,thresh2):
+    if (img.dtype != np.uint8):
+        img = cv2.normalize(img,None,0,255,cv2.NORM_MINMAX,cv2.CV_8U)
+        print(img.dtype)
+    showImage(img, 'Before Canny, Only for Proving')
+    #CV2 Canny can only work with uint8 images. 
+    #However when you try to turn float64 to uint8, all the images disappeared.
+    #This is due to numbers like 32 in float64 when normalise to uint8 will be 0.
+    edges = cv2.Canny(img,thresh1,thresh2)
+    showImage(edges, 'Canny Detector')
+    return edges
 
 
 if __name__ == '__main__':
@@ -118,35 +148,50 @@ if __name__ == '__main__':
     #For Analysis, use 250
     shrink_thresh = 0
     
-    imageBEL = readRawFile(directory+imageBELDir, 830,2330,2700,4200,shrink_thresh)
-    imageBELHue = hsvConverter(imageBEL)
-    imageBELHueWA,BELHueWAmax,BELHueWAmin,BELHueWAavg = weightedAverageFiltering(imageBELHue)
+    # imageBEL = readRawFile(directory+imageBELDir, 830,2330,2700,4200,shrink_thresh)
+    # imageBELHue = hsvConverter(imageBEL)
+    # imageBELHueWA,BELHueWAmax,BELHueWAmin,BELHueWAavg = weightedAverageFiltering(imageBELHue)
     
-    imageBL = readRawFile(directory+imageBLDir, 800,2300,2700,4200,shrink_thresh)
-    imageBLHue = hsvConverter(imageBL)
-    imageBLHueWA,BLHueWAmax,BLHueWAmin,BLHueWAavg = weightedAverageFiltering(imageBLHue)
+    # imageBL = readRawFile(directory+imageBLDir, 800,2300,2700,4200,shrink_thresh)
+    # imageBLHue = hsvConverter(imageBL)
+    # imageBLHueWA,BLHueWAmax,BLHueWAmin,BLHueWAavg = weightedAverageFiltering(imageBLHue)
     
     imageBId = readRawFile(directory+imageBIdDir, 800,2300,2700,4200,shrink_thresh)
     imageBIdHue = hsvConverter(imageBId)
     imageBIdHueWA,BIdHueWAmax,BIdHueWAmin,BIdHueWAavg = weightedAverageFiltering(imageBIdHue)
     
-    imageBH = readRawFile(directory+imageBHDir, 800,2300,2700,4200,shrink_thresh)
-    imageBHHue = hsvConverter(imageBH)
-    imageBHHueWA,BHHueWAmax,BHHueWAmin,BHHueWAavg = weightedAverageFiltering(imageBHHue)
+    # imageBH = readRawFile(directory+imageBHDir, 800,2300,2700,4200,shrink_thresh)
+    # imageBHHue = hsvConverter(imageBH)
+    # imageBHHueWA,BHHueWAmax,BHHueWAmin,BHHueWAavg = weightedAverageFiltering(imageBHHue)
     
-    imageBEH = readRawFile(directory+imageBEHDir, 800,2300,2650,4150,shrink_thresh)
-    imageBEHHue = hsvConverter(imageBEH)
-    imageBEHHueWA,BEHHueWAmax,BEHHueWAmin,BEHHueWAavg = weightedAverageFiltering(imageBEHHue)
+    # imageBEH = readRawFile(directory+imageBEHDir, 800,2300,2650,4150,shrink_thresh)
+    # imageBEHHue = hsvConverter(imageBEH)
+    # imageBEHHueWA,BEHHueWAmax,BEHHueWAmin,BEHHueWAavg = weightedAverageFiltering(imageBEHHue)
+    
+    imageBIC = readRawFile(directory+imageBICDir, 750,2250,2700,4200,shrink_thresh)
+    imageBICHue = hsvConverter(imageBIC)
+    imageBICHueWA,BICHueWAmax,BICHueWAmin,BICHueWAavg = weightedAverageFiltering(imageBICHue)
+    
     
     # showImage(imageBEHHueWA,'After Averaging')
-    showImage(imageBId,'Original')
+    showImage(imageBIC,'Original')
+    showImage(imageBICHue,'Hue')
+    showImage(imageBICHueWA,'Weighted Average')
+    #plt.hist(imageBIdHue)
     
-    imageBHueMax = [BELHueWAmax,BLHueWAmax,BIdHueWAmax,BHHueWAmax,BEHHueWAmax]
-    imageBHueMin = [BELHueWAmin,BLHueWAmin,BIdHueWAmin,BHHueWAmin,BEHHueWAmin]
-    imageBHueAvg = [BELHueWAavg,BLHueWAavg,BIdHueWAavg,BHHueWAavg,BEHHueWAavg]
+    
+    #Canny if we want to remove background, but not really needed
+    grey = convertGreyScale(imageBIC)
+    showImage(grey, 'grey')
+    edges =cannyDetector(grey, 85, 255)
+    
+    
+    # imageBHueMax = [BELHueWAmax,BLHueWAmax,BIdHueWAmax,BHHueWAmax,BEHHueWAmax]
+    # imageBHueMin = [BELHueWAmin,BLHueWAmin,BIdHueWAmin,BHHueWAmin,BEHHueWAmin]
+    # imageBHueAvg = [BELHueWAavg,BLHueWAavg,BIdHueWAavg,BHHueWAavg,BEHHueWAavg]
     #Deduce that a good range will be from 90 to 357
-    result = thresholding(imageBIdHue)
-    showImage(result, 'Blah Blah')
+    result = thresholding(imageBICHueWA)
+    showImage(result, 'After Modification')
     if cv2.waitKey(0):
         cv2.destroyAllWindows()
 
@@ -156,20 +201,5 @@ if __name__ == '__main__':
 
 
 #readRawFile(directory+imageBIC,750,2250,2700,4200)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
