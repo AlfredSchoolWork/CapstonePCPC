@@ -8,4 +8,4 @@ python libaraies:
 4. matplotlib
 ---
 SDKs:
-- Canon SDK
+- Canon SDK (Not Used for now)
