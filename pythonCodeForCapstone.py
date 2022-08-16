@@ -11,7 +11,7 @@ import rawpy
 
 def showImage(img,imageLabel):
     #Converts images to uint8 for cv2 imshow.
-    print(img.dtype)
+    #print(img.dtype)
     if (img.dtype != np.uint16):
         img = cv2.normalize(img,None,0,65535,cv2.NORM_MINMAX,cv2.CV_16U)
         # img = img.astype(np.uint16)
@@ -29,6 +29,7 @@ def readRawFile(filename,y1,y2,x1,x2,strink_thresh):
     raw = rawpy.imread(filename)
     #rgb = raw.raw_image
     rgb = raw.postprocess(gamma=(1,1), output_bps=16)
+    showImage(rgb, 'Original Without Shrinking')
     size = raw.sizes
     y1 = y1 + strink_thresh
     y2 = y2 - strink_thresh
@@ -54,6 +55,8 @@ def hsvConverter(img):
     #showImage(img)
     hsv = cv2.cvtColor(img,cv2.COLOR_RGB2HSV)
     hue = hsv[:,:,0]
+    #To extract Data, we need to specify it hue[row,col]  
+    
     #Not necessary, but we need to make sure that sat and val are not influencing 
     #the result.
     sat = hsv[:,:,1]
@@ -79,11 +82,19 @@ def weightedAverageFiltering(img):
     
     return imgWeightedAvg,maxi,mini,avg
     
-
+ 
 def thresholding(img):
-    #Original Number 90,360
-    img[img<90] = 100000
-    img[img>360] = 100000
+        #Original Number 90,360
+    #Selecting the colour that I want to look at... 
+    #Thresholds of acceptable values
+    
+    
+    
+    img[img<90] = 0
+    img[img>360] = 0
+    
+    #The THRESHOLDING ALGORITHM IS NOT CORRECT
+    
     # for y,row in enumerate(img):
     #     for x, pixel in enumerate(row):
     #         if pixel<90 or pixel>350:
@@ -92,14 +103,6 @@ def thresholding(img):
     return img
 
 
-def consistencyCheck(img):
-    for y,row in enumerate(img):
-        for x, pixel in enumerate(row):
-            if x == 0 or x== 1500:
-                continue
-            if y == 0 or y ==1500:
-                continue
-    return None
 
 def convertGreyScale(img):
     if (img.dtype != np.float32):
@@ -127,6 +130,43 @@ def cannyDetector(img,thresh1,thresh2):
     showImage(edges, 'Canny Detector')
     return edges
 
+def pixelCounting(img,window_size,start_window_x,start_window_y):
+    counts = 0
+    for col in range(window_size):
+        for row in range(window_size):
+            if (img[row+start_window_x-1,col+start_window_y-1])>0:
+                counts = counts +1
+    return counts
+
+def pixelCounter(img):
+    print("Current Image Dimension: ",img.shape)
+    (row,col) = img.shape
+    
+    window_size = 100
+    top_pos = 10
+    bottom_pos = col - window_size - top_pos
+    left_pos = 10
+    right_pos = row - window_size - left_pos
+    #Middle Not doing well, ignore for now
+    middle_frm_top = col//4 
+    middle_frm_left = row//4
+    
+    #Ignore Middle results for now
+    middle_count = pixelCounting(img, window_size, 250, 250)
+    print("Middle: ",middle_count)
+    top_left_count = pixelCounting(img, window_size, top_pos, left_pos)
+    print("Top Left: ",top_left_count)
+    top_right_count = pixelCounting(img, window_size, top_pos, right_pos)
+    print("Top Right: ",top_right_count)
+    bottom_left_count = pixelCounting(img, window_size, bottom_pos, left_pos)
+    print("Bottom left: ", bottom_left_count)
+    bottom_right_count = pixelCounting(img, window_size, bottom_pos, right_pos)
+    print("Bottom Right: ",bottom_right_count)
+    
+    
+    return None
+
+
 
 if __name__ == '__main__':
     #Definition of all files names
@@ -144,9 +184,15 @@ if __name__ == '__main__':
     imageBHDir = 'Black_4_Tripod.cr2'
     imageBEHDir = 'Black_5_Tripod.cr2' #Good crop at 800,2300,2650,4150
     imageBICDir = 'Black_6_Tripod.cr2' #Good crop at 750,2250,2700,4200
+    imageBIdRearDir = 'Black_3_Rear_Tripod.cr2'
     
     #For Analysis, use 250
-    shrink_thresh = 0
+    shrink_thresh = 250
+    
+    #imageBIdRear = readRawFile(directory+imageBIdRearDir, 530,3130,1700,4200,shrink_thresh)
+    #imageBIdRearHue = hsvConverter(imageBIdRear)
+    #imageBIdRearHueWA,BIdRearHueWAmax,BIdRearHueWAmin,BIdRearHueWAavg = weightedAverageFiltering(imageBIdRearHue)
+    
     
     # imageBEL = readRawFile(directory+imageBELDir, 830,2330,2700,4200,shrink_thresh)
     # imageBELHue = hsvConverter(imageBEL)
@@ -160,38 +206,51 @@ if __name__ == '__main__':
     imageBIdHue = hsvConverter(imageBId)
     imageBIdHueWA,BIdHueWAmax,BIdHueWAmin,BIdHueWAavg = weightedAverageFiltering(imageBIdHue)
     
-    # imageBH = readRawFile(directory+imageBHDir, 800,2300,2700,4200,shrink_thresh)
-    # imageBHHue = hsvConverter(imageBH)
-    # imageBHHueWA,BHHueWAmax,BHHueWAmin,BHHueWAavg = weightedAverageFiltering(imageBHHue)
+    imageBH = readRawFile(directory+imageBHDir, 800,2300,2700,4200,shrink_thresh)
+    imageBHHue = hsvConverter(imageBH)
+    imageBHHueWA,BHHueWAmax,BHHueWAmin,BHHueWAavg = weightedAverageFiltering(imageBHHue)
     
-    # imageBEH = readRawFile(directory+imageBEHDir, 800,2300,2650,4150,shrink_thresh)
-    # imageBEHHue = hsvConverter(imageBEH)
-    # imageBEHHueWA,BEHHueWAmax,BEHHueWAmin,BEHHueWAavg = weightedAverageFiltering(imageBEHHue)
+    imageBEH = readRawFile(directory+imageBEHDir, 800,2300,2650,4150,shrink_thresh)
+    imageBEHHue = hsvConverter(imageBEH)
+    imageBEHHueWA,BEHHueWAmax,BEHHueWAmin,BEHHueWAavg = weightedAverageFiltering(imageBEHHue)
     
-    imageBIC = readRawFile(directory+imageBICDir, 750,2250,2700,4200,shrink_thresh)
-    imageBICHue = hsvConverter(imageBIC)
-    imageBICHueWA,BICHueWAmax,BICHueWAmin,BICHueWAavg = weightedAverageFiltering(imageBICHue)
+    # imageBIC = readRawFile(directory+imageBICDir, 750,2250,2700,4200,shrink_thresh)
+    # imageBICHue = hsvConverter(imageBIC)
+    # imageBICHueWA,BICHueWAmax,BICHueWAmin,BICHueWAavg = weightedAverageFiltering(imageBICHue)
     
     
     # showImage(imageBEHHueWA,'After Averaging')
-    showImage(imageBIC,'Original')
-    showImage(imageBICHue,'Hue')
-    showImage(imageBICHueWA,'Weighted Average')
+    #showImage(imageBIdRear,'Original')
+    #showImage(imageBIdRearHue,'Hue')
+    #showImage(imageBIdRearHueWA,'Weighted Average')
     #plt.hist(imageBIdHue)
     
     
     #Canny if we want to remove background, but not really needed
-    grey = convertGreyScale(imageBIC)
-    showImage(grey, 'grey')
-    edges =cannyDetector(grey, 85, 255)
+    #grey = convertGreyScale(imageBIdRear)
+    #showImage(grey, 'grey')
+    #edges =cannyDetector(grey, 85, 255)
     
     
     # imageBHueMax = [BELHueWAmax,BLHueWAmax,BIdHueWAmax,BHHueWAmax,BEHHueWAmax]
     # imageBHueMin = [BELHueWAmin,BLHueWAmin,BIdHueWAmin,BHHueWAmin,BEHHueWAmin]
     # imageBHueAvg = [BELHueWAavg,BLHueWAavg,BIdHueWAavg,BHHueWAavg,BEHHueWAavg]
     #Deduce that a good range will be from 90 to 357
-    result = thresholding(imageBICHueWA)
+    showImage(imageBId, 'Original Image')
+    result2 = thresholding(imageBIdHue)
+    showImage(result2,'Without Weights')
+    #print(imageBIdHue[1])
+    pixelCounter(imageBIdHue)
+    #pixelCounter(result2)
+    pixelCounter(imageBHHue)
+    pixelCounter(imageBEHHue)
+    
+    
+    result = thresholding(imageBIdHueWA)
     showImage(result, 'After Modification')
+    #pixelCounting(imageBIdHueWA, 10, 10)
+    
+    
     if cv2.waitKey(0):
         cv2.destroyAllWindows()
 
@@ -201,5 +260,20 @@ if __name__ == '__main__':
 
 
 #readRawFile(directory+imageBIC,750,2250,2700,4200)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
