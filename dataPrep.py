@@ -46,7 +46,8 @@ def cropImage(img,measurement,size=700):
     cropped_G = cropped[(row//4*2):(row//4*4),0:(col//4*2)]
     cropped_H = cropped[(row//4*2):(row//4*4),(col//4):(col//4*3)]
     cropped_I = cropped[(row//4*2):(row//4*4),(col//4*2):(col//4*4)]
-    rf.showImage(cropped, "cropped")
+    #cv2.destroyWindow("Original")
+    rf.showImage(cropped, "Cropped")
     # rf.showImage(cropped_A, "cropped_A")
     # rf.showImage(cropped_B, "cropped_B")
     # rf.showImage(cropped_C, "cropped_C")
@@ -90,6 +91,7 @@ def imageDataSetup(filename,measurement):
         if key == ord("c"):
             print(refPt)
             break
+        
     if (len(refPt) == 2):
         #Change this value such that all the values suit the data point
         data_new = cropImage(rgb,measurement,650)
@@ -101,7 +103,7 @@ def imageDataSetup(filename,measurement):
         
     return data_new
 
-def crop_save():
+def crop_save(save = False):
     directory = 'images/'
     image1 = 'Black_1_Tripod.cr2' #Good crop at 830,2330,2700,4200
     image2  = 'Black_2_Tripod.cr2' #Good crop at 800,2300,2700,4200
@@ -181,7 +183,8 @@ def crop_save():
     data = np.append(data,data_new12)
     print(len(data))
     
-    #np.savez('data/traindata.npz',data)
+    if (save):
+        np.savez('data/traindata.npz',data)
 
 def split_data():
     testData = np.load('data/traindata.npz')
@@ -213,18 +216,6 @@ def split_data():
     np.savez('data/valid_data.npz',valid_data)
 
 if __name__ == '__main__':
-    crop_save()
     
-    
+    #crop_save()
     #split_data()
-    
-    
-    
-
-    
-    
-    
-        
-    
-    
-    
