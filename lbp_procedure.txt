@@ -1,0 +1,7 @@
+LBP test procedure:
+
+1.	Manually crop all the Tripod taken pictures without the background.
+2.	Set up the list of parameters for generating the Local binary pattern processed images.
+3.	Put all the images both black and white into a list. Then generate all the necessary folders from all the parameters and the labels.
+4.	Using the multiprocessing module, process all the images with the given parameters.
+5.	Within the processing function, read the image then process the image for the given parameters, then save the image.
