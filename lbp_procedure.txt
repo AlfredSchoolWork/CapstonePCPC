@@ -1,7 +1,45 @@
-LBP test procedure:
+Purpose:
+To pick out the best setting of the Local Binary Pattern method,
+by generate a series of images with different settings for human inspection.
 
+Materials:
+All the accepted images taken by tripod from black and white samples.
+
+LBP test procedure:
 1.	Manually crop all the Tripod taken pictures without the background.
 2.	Set up the list of parameters for generating the Local binary pattern processed images.
-3.	Put all the images both black and white into a list. Then generate all the necessary folders from all the parameters and the labels.
-4.	Using the multiprocessing module, process all the images with the given parameters.
-5.	Within the processing function, read the image then process the image for the given parameters, then save the image.
+3.	Put all the images both black and white into a list.
+    Then generate all the necessary folders from all the parameters and the labels.
+4.	Using the multiprocessing module,
+    process all the images with the given parameters.
+5.	Within the processing function,
+    read the image then process the image for the given parameters,
+    then save the image.
+
+Observations:
+
+1. As R value increases, the "grain" in the output images will become larger. (expected)
+2. As P value increases, the "grain" in the output images will become more prominent. (expected)
+3. Among the methods tested, the texture from the plate is strengthened by the default method.Purpose:
+To pick out the best setting of the Local Binary Pattern method,
+by generate a series of images with different settings for human inspection.
+
+Materials:
+All the accepted images taken by tripod from black and white samples.
+
+LBP test procedure:
+1.	Manually crop all the Tripod taken pictures without the background.
+2.	Set up the list of parameters for generating the Local binary pattern processed images.
+3.	Put all the images both black and white into a list.
+    Then generate all the necessary folders from all the parameters and the labels.
+4.	Using the multiprocessing module,
+    process all the images with the given parameters.
+5.	Within the processing function,
+    read the image then process the image for the given parameters,
+    then save the image.
+
+Observations:
+
+1. As R value increases, the "grain" in the output images will become larger. (expected)
+2. As P value increases, the "grain" in the output images will become more prominent. (expected)
+3. Among the methods tested, the texture from the plate is strengthened by the default method.
