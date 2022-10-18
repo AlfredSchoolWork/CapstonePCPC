@@ -55,6 +55,9 @@ Copyright: Python Software Foundation
 License: PSF License Version 2 and the Zero-Clause BSD license.
 Link: https://github.com/python/cpython/tree/3.10/Lib/multiprocessing/
 
+Libraries: pytorch
+Copyright: Facebook, Inc,Idiap Research Institut, Deepmind Technologies,NEC Laboratories America,NYU
+License: BSD style License
 
 License: BSD-3-Clause
 
